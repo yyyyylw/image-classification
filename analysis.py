@@ -171,20 +171,19 @@ class _Hook:
 
 
 def gradcam(model, images, target_idx):
-    """对一批图像计算 Grad-CAM 热力图（需模型已含 target 层，梯度由 target
-    类别反向传播）。返回与输入同尺寸的归一化热力图数组。"""
-    hooks = []
+    """对一批图像计算 Grad-CAM 热力图（梯度由每张图各自的 target 类别反向
+    传播）。返回与输入同尺寸的归一化热力图数组。"""
     last_conv = None
     for m in model.modules():
         if isinstance(m, torch.nn.Conv2d):
             last_conv = m
     hook = _Hook()
     last_conv.register_forward_hook(hook)
-    hooks.append(hook)
 
     logits = model(images)
     model.zero_grad()
-    logits[:, target_idx].sum().backward()
+    targets = torch.as_tensor(target_idx, device=images.device)
+    logits[torch.arange(logits.size(0)), targets].sum().backward()
 
     w = hook.grads.mean(dim=(2, 3), keepdim=True)      # [B, C, 1, 1]
     cams = (w * hook.acts).sum(1).clamp(min=0)         # [B, H, W]
