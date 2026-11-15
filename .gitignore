@@ -1,0 +1,12 @@
+__pycache__/
+*.pyc
+data/
+results/
+figures/
+实验报告*.docx
+实验报告*.pdf
+*.zip
+实验三要求*.pdf
+当代人工智能作业三.pdf
+training_*.log
+提交GitHub流程.md
