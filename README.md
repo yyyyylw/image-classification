@@ -11,12 +11,29 @@ Grad-CAM 可解释性分析。
 ├── train.py      # 训练入口：数据划分、训练循环、早停、调度器、日志与检查点
 ├── analysis.py   # 测试集评估：混淆矩阵、每类准确率、训练曲线、
 │                 #   误分类样本网格、Grad-CAM 热力图
+├── make_report_docx.py   # 实验报告 md -> docx 排版脚本（可选）
+├── export_docx_pdf.py    # 用本机 Word 将 docx 导出为 PDF（可选）
 ├── README.md
 └── .gitignore
 ```
 
 数据集与训练产物不入库：CIFAR-10 由 torchvision 自动下载到 `data/`，训练日志、
 检查点与图表分别写入 `results/` 与 `figures/`。
+
+## 实验结果
+
+在 20 核 CPU 上按上述设置复现（每组约 1-2.5 小时）：
+
+| 实验组 | 模型 | 策略 | 验证集最优准确率 | 测试集准确率 |
+| --- | --- | --- | --- | --- |
+| cnn_baseline | SimpleCNN | 无增强、固定学习率 0.01 | 86.70% | 85.35% |
+| cnn_improved | SimpleCNN | 数据增强 + 余弦退火 + 标签平滑 0.1 | 89.74% | **90.15%** |
+| resnet20 | ResNet-20 | 同 cnn_improved | 90.06% | 89.96% |
+
+数据增强、余弦退火与标签平滑使同一网络提升 4.8 个百分点，并把训练/验证准确率
+差距从约 10.5 个百分点收窄到 4.4 个百分点；ResNet-20 在有限训练预算下与增强后的
+SimpleCNN 基本持平。更多分析（混淆矩阵、每类准确率、误分类样本、Grad-CAM）见
+实验报告与 `analysis.py`。
 
 ## 环境
 
